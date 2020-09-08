@@ -4671,6 +4671,14 @@ static int dwc3_otg_start_host(struct dwc3_msm *mdwc, int on)
 			return ret;
 		}
 
+		if (dwc->dis_split_quirk) {
+			u32 reg;
+
+			reg = dwc3_readl(dwc->regs, DWC3_GUCTL3);
+			reg |= DWC3_GUCTL3_SPLITDISABLE;
+			dwc3_writel(dwc->regs, DWC3_GUCTL3, reg);
+		}
+
 		mdwc->in_host_mode = true;
 		dwc3_usb3_phy_suspend(dwc, true);
 
