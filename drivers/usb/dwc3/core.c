@@ -1388,7 +1388,9 @@ static int dwc3_probe(struct platform_device *pdev)
 
 	void __iomem		*regs;
 	int			irq;
+#ifdef CONFIG_IPC_LOGGING
 	char			dma_ipc_log_ctx_name[40];
+#endif
 
 	if (count >= DWC_CTRL_COUNT) {
 		dev_err(dev, "Err dwc instance %d >= %d available\n",
@@ -1486,7 +1488,7 @@ static int dwc3_probe(struct platform_device *pdev)
 			goto err3;
 		}
 	}
-
+#ifdef CONFIG_IPC_LOGGING
 	dwc->dwc_ipc_log_ctxt = ipc_log_context_create(NUM_LOG_PAGES,
 					dev_name(dwc->dev), 0);
 	if (!dwc->dwc_ipc_log_ctxt)
@@ -1499,13 +1501,15 @@ static int dwc3_probe(struct platform_device *pdev)
 	if (!dwc->dwc_dma_ipc_log_ctxt)
 		dev_dbg(dwc->dev, "Error getting ipc_log_ctxt for ep_events\n");
 
+#endif
 	dwc3_instance[count] = dwc;
 	dwc->index = count;
 	count++;
 
 	pm_runtime_allow(dev);
+#ifdef CONFIG_DEBUG_FS
 	dwc3_debugfs_init(dwc);
-
+#endif
 	dma_set_max_seg_size(dev, UINT_MAX);
 
 	return 0;
@@ -1540,7 +1544,9 @@ static int dwc3_remove(struct platform_device *pdev)
 	 * memory region the next time probe is called.
 	 */
 	res->start -= DWC3_GLOBALS_REGS_START;
-
+#ifdef CONFIG_DEBUG_FS
+	dwc3_debugfs_exit(dwc);
+#endif
 	dwc3_gadget_exit(dwc);
 	dwc3_debugfs_exit(dwc);
 	pm_runtime_allow(&pdev->dev);
@@ -1550,12 +1556,12 @@ static int dwc3_remove(struct platform_device *pdev)
 
 	dwc3_free_event_buffers(dwc);
 	dwc3_free_scratch_buffers(dwc);
-
+#ifdef CONFIG_IPC_LOGGING
 	ipc_log_context_destroy(dwc->dwc_ipc_log_ctxt);
 	dwc->dwc_ipc_log_ctxt = NULL;
+#endif
 	count--;
 	dwc3_instance[dwc->index] = NULL;
-
 	return 0;
 }
 
