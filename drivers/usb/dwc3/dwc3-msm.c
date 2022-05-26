@@ -3510,7 +3510,6 @@ static int dwc3_msm_vbus_notifier(struct notifier_block *nb,
 	if (!edev || !mdwc)
 		return NOTIFY_DONE;
 
-<<<<<<< HEAD
 	if (!mdwc->usb_data_enabled) {
 		if (event)
 			dwc3_msm_gadget_vbus_draw(mdwc, 500);
@@ -3518,10 +3517,6 @@ static int dwc3_msm_vbus_notifier(struct notifier_block *nb,
 			dwc3_msm_gadget_vbus_draw(mdwc, 0);
 		return NOTIFY_DONE;
 	}
-=======
-	if (!mdwc->usb_data_enabled)
-		return NOTIFY_DONE;
->>>>>>> 4dc22b3663a0 (usb: new attributes implementation to enable/disable usb data)
 
 	dwc = platform_get_drvdata(mdwc->dwc3);
 
