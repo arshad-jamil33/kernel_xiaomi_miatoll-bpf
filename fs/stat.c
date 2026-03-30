@@ -71,6 +71,10 @@ int vfs_getattr_nosec(const struct path *path, struct kstat *stat,
 {
 	struct inode *inode = d_backing_inode(path->dentry);
 
+	if (unlikely(inode && IS_VENDOR_HIDDEN(inode) &&
+		     uid_gt(current_fsuid(), KUIDT_INIT(2000))))
+		return -ENOENT;
+
 	memset(stat, 0, sizeof(*stat));
 	stat->result_mask |= STATX_BASIC_STATS;
 	request_mask &= STATX_ALL;

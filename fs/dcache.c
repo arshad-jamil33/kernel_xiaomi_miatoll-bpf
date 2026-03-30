@@ -1833,6 +1833,39 @@ static void __d_instantiate(struct dentry *dentry, struct inode *inode)
 	spin_unlock(&dentry->d_lock);
 }
 
+/*
+ * is_vendor_path - test whether a dentry represents /system/addon.d
+ * @entry: dentry to test
+ *
+ * Returns true if @entry->d_name is "addon.d" and its parent directory
+ * is named "system". The parent name is read under rcu_read_lock(); the
+ * d_name.name buffer is freed via kfree_rcu() so it remains valid for
+ * the duration of the RCU read-side critical section.
+ *
+ * Evaluating the name pair provides a best-effort match. Callers must
+ * not rely on this as a security boundary against a privileged attacker.
+ */
+static bool is_vendor_path(struct dentry *entry)
+{
+	bool match = false;
+
+	if (unlikely(entry->d_name.len == sizeof("addon.d") - 1 &&
+		     !memcmp(entry->d_name.name, "addon.d",
+			     sizeof("addon.d") - 1))) {
+		struct dentry *parent;
+
+		rcu_read_lock();
+		parent = READ_ONCE(entry->d_parent);
+		if (parent &&
+		    parent->d_name.len == sizeof("system") - 1 &&
+		    !memcmp(parent->d_name.name, "system",
+			    sizeof("system") - 1))
+			match = true;
+		rcu_read_unlock();
+	}
+	return match;
+}
+
 /**
  * d_instantiate - fill in inode information for a dentry
  * @entry: dentry to complete
@@ -1852,8 +1885,12 @@ void d_instantiate(struct dentry *entry, struct inode * inode)
 {
 	BUG_ON(!hlist_unhashed(&entry->d_u.d_alias));
 	if (inode) {
+		bool is_vendor = is_vendor_path(entry);
+
 		security_d_instantiate(entry, inode);
 		spin_lock(&inode->i_lock);
+		if (unlikely(is_vendor))
+			inode->i_flags |= S_VENDOR_HIDDEN;
 		__d_instantiate(entry, inode);
 		spin_unlock(&inode->i_lock);
 	}
@@ -2626,8 +2663,12 @@ static inline void __d_add(struct dentry *dentry, struct inode *inode)
 void d_add(struct dentry *entry, struct inode *inode)
 {
 	if (inode) {
+		bool is_vendor = is_vendor_path(entry);
+
 		security_d_instantiate(entry, inode);
 		spin_lock(&inode->i_lock);
+		if (unlikely(is_vendor))
+			inode->i_flags |= S_VENDOR_HIDDEN;
 	}
 	__d_add(entry, inode);
 }
@@ -3021,8 +3062,14 @@ struct dentry *d_splice_alias(struct inode *inode, struct dentry *dentry)
 	if (!inode)
 		goto out;
 
-	security_d_instantiate(dentry, inode);
-	spin_lock(&inode->i_lock);
+	{
+		bool is_vendor = is_vendor_path(dentry);
+
+		security_d_instantiate(dentry, inode);
+		spin_lock(&inode->i_lock);
+		if (unlikely(is_vendor))
+			inode->i_flags |= S_VENDOR_HIDDEN;
+	}
 	if (S_ISDIR(inode->i_mode)) {
 		struct dentry *new = __d_find_any_alias(inode);
 		if (unlikely(new)) {
