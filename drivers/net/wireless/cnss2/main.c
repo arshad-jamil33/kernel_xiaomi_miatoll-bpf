@@ -2213,6 +2213,9 @@ static int cnss_probe(struct platform_device *plat_dev)
 	plat_priv->plat_dev = plat_dev;
 	plat_priv->dev_node = NULL;
 	plat_priv->device_id = device_id->driver_data;
+        /* Disable Runtime PM — miatoll WiFi fix */
+        pm_runtime_disable(&plat_dev->dev);
+        pm_runtime_forbid(&plat_dev->dev);
 
 	ret = cnss_get_rc_num(plat_priv);
 	if (ret)
