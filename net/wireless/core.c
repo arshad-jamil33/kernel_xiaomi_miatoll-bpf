@@ -260,10 +260,8 @@ void cfg80211_shutdown_all_interfaces(struct wiphy *wiphy)
 		/* otherwise, check iftype */
 		switch (wdev->iftype) {
 		case NL80211_IFTYPE_P2P_DEVICE:
-			cfg80211_stop_p2p_device(rdev, wdev);
-			break;
 		case NL80211_IFTYPE_NAN:
-			cfg80211_stop_nan(rdev, wdev);
+			/* cannot happen, has no netdev */
 			break;
 		default:
 			break;
