@@ -662,7 +662,7 @@ int pm_suspend(suspend_state_t state)
 
 	pm_suspend_marker("entry");
 	pr_debug("suspend entry (%s)\n", mem_sleep_labels[state]);
-	qcom_smem_state_update_bits(smem_state, AWAKE_BIT, 0);
+	//qcom_smem_state_update_bits(smem_state, AWAKE_BIT, 0);
 	error = enter_state(state);
 	qcom_smem_state_update_bits(smem_state, AWAKE_BIT, AWAKE_BIT);
 	if (error) {
