@@ -1,7 +1,7 @@
 [submodule "KernelSU"]
 	path = KernelSU
-	url = https://github.com/Trijal08/KernelSU.git
-	branch = master-susfs
+	url = https://github.com/arshad-jamil33/KernelSU.git
+	branch = ksu-susfs
 [submodule "v4l2loopback"]
 	path = v4l2loopback
 	url = https://github.com/v4l2loopback/v4l2loopback.git
