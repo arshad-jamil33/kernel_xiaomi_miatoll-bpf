@@ -1469,7 +1469,7 @@ static inline void __set_task_cpu(struct task_struct *p, unsigned int cpu)
 # include <linux/static_key.h>
 # define const_debug __read_mostly
 #else
-# define const_debug const
+# define const_debug __read_mostly
 #endif
 
 #define SCHED_FEAT(name, enabled)	\

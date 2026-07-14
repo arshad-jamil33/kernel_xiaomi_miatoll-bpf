@@ -134,22 +134,12 @@ static inline void gpio_reset(struct gf_dev *gf_dev) {
 #define GF_IOC_RESET _IO(GF_IOC_MAGIC, 2)
 #define GF_IOC_ENABLE_IRQ _IO(GF_IOC_MAGIC, 3)
 #define GF_IOC_DISABLE_IRQ _IO(GF_IOC_MAGIC, 4)
-static inline long gf_ioctl(struct file *filp, unsigned int cmd,
-							unsigned long arg) {
-	struct gf_dev *gf_dev = &gf;
-
-	if (gf_dev->async)
-		kill_fasync(&gf_dev->async, SIGIO, POLL_IN);
-#endif
-
-	return IRQ_HANDLED;
-}
 
 static int irq_setup(struct gf_dev *gf_dev)
 {
 	int status;
 
-	gf_dev->irq = gf_irq_num(gf_dev);
+        gf_dev->irq = gpio_to_irq(gf_dev->irq_gpio);
 	status = request_threaded_irq(gf_dev->irq, NULL, gf_irq,
 			IRQF_TRIGGER_RISING | IRQF_ONESHOT | IRQF_PERF_AFFINE,
 			"gf", gf_dev);
