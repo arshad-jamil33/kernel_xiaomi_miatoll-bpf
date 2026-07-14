@@ -29,6 +29,8 @@ make -j$(nproc --all) O=out \
                       CROSS_COMPILE="${PWD}/gcc64/bin/aarch64-linux-android-" \
                       CROSS_COMPILE_ARM32="${PWD}/gcc32/bin/arm-linux-androideabi-" \
                       LD=ld.lld \
+                      NM=llvm-nm \
+                      OBJCOPY=llvm-objcopy \
                       CONFIG_NO_ERROR_ON_MISMATCH=y
 }
 function zupload()
