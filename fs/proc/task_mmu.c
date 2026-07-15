@@ -436,7 +436,7 @@ static int show_vma_header_prefix(struct seq_file *m, unsigned long start,
 
 	out[len++] = ' ';
 
-	len += num_to_str(&out[len], 20, ino);
+	len += num_to_str(&out[len], 20, ino, 0);
 
 	out[len++] = ' ';
 
@@ -601,6 +601,7 @@ const struct file_operations proc_pid_maps_operations = {
 
 #ifdef CONFIG_PROC_PAGE_MONITOR
 struct mem_size_stats {
+        unsigned long first_vma_start;
 	unsigned long resident;
 	unsigned long shared_clean;
 	unsigned long shared_dirty;
@@ -1010,10 +1011,14 @@ static int show_smap(struct seq_file *m, void *v)
 {
 	struct vm_area_struct *vma = v;
 	struct mem_size_stats mss;
+        bool rollup_mode = false;
+
+        struct vm_area_struct *last_vma = NULL;
+        int ret = 0;
 
 	memset(&mss, 0, sizeof(mss));
 
-	smap_gather_stats(vma, mss);
+	smap_gather_stats(vma, &mss);
 
 	if (!rollup_mode) {
 		show_map_vma(m, vma);
