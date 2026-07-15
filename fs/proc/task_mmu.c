@@ -1028,7 +1028,7 @@ static int show_smap(struct seq_file *m, void *v)
 		}
 	} else if (last_vma) {
 		show_vma_header_prefix(
-			m, mss->first_vma_start, vma->vm_end, 0, 0, 0, 0);
+			m, mss.first_vma_start, vma->vm_end, 0, 0, 0, 0);
 		seq_puts(m, "[rollup]\n");
 	} else {
 		ret = SEQ_SKIP;
